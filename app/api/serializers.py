@@ -6,3 +6,4 @@ class UrlShortenerSerializer(ModelSerializer):
     class Meta:
         model = UrlShortener
         fields = ['longurl', 'shorturl']
+        read_only_fields = ['shorturl']

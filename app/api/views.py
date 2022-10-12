@@ -30,5 +30,5 @@ class MakeshortUrl(generics.CreateAPIView):
 
 class RedirectUrl(View):
     def get(self, request, shorturl):
-        redirect_link = UrlShortener.objects.filter(shorturl=self.kwargs['shorturl']).first().longurl
+        redirect_link = UrlShortener.objects.filter(shorturl=shorturl).values('longurl').first()['longurl']
         return redirect(redirect_link)
