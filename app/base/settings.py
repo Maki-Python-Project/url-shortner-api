@@ -19,7 +19,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # 3-rd party apps
     "rest_framework",
+
     # local apps
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -98,3 +100,5 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
     )
 }
+
+HOST_URL = "http://localhost:8000/"
