@@ -6,6 +6,7 @@ from django.views import View
 from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.response import Response
+from django.db.models import Count
 
 from .serializers import UrlShortenerSerializer
 from .models import UrlShortener
@@ -33,6 +34,13 @@ class RedirectUrl(View):
     def get(self, request, shorturl):
         redirect_link = UrlShortener.objects.filter(shorturl=shorturl).values('longurl').first()['longurl']
         return redirect(redirect_link)
+
+
+class TheMostPopularUrl(generics.ListAPIView):
+    serializer_class = UrlShortenerSerializer
+
+    def get_queryset(self):
+        return UrlShortener.objects.values("longurl").annotate(count=Count('longurl')).order_by("-count")
 
 
 def get_count_all_shortened_url(request):
