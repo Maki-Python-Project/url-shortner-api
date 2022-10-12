@@ -3,6 +3,7 @@ import string
 
 from django.shortcuts import redirect
 from django.views import View
+from django.http import JsonResponse
 from rest_framework import generics
 from rest_framework.response import Response
 
@@ -32,3 +33,8 @@ class RedirectUrl(View):
     def get(self, request, shorturl):
         redirect_link = UrlShortener.objects.filter(shorturl=shorturl).values('longurl').first()['longurl']
         return redirect(redirect_link)
+
+
+def get_count_all_shortened_url(request):
+    data = UrlShortener.objects.all().count()
+    return JsonResponse({'count': data})
