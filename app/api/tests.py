@@ -50,8 +50,7 @@ def test_check_count_all_urls(api_client, create_longurl_and_shorturl):
 def test_create_shortener_url(api_client, create_longurl_and_shorturl):
     url = settings.HOST_URL + 'shorten/'
     response = api_client.post(url, {
-            'longurl': create_longurl_and_shorturl[1]
-        }
-    )
+        'longurl': create_longurl_and_shorturl[1]
+    })
 
     assert response.status_code == status.HTTP_200_OK, 'Cannot create shortener url'
