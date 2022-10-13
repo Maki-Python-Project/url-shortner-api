@@ -1,5 +1,6 @@
 import random
 import string
+from django.conf import settings
 
 from django.shortcuts import redirect
 from django.views import View
@@ -10,22 +11,35 @@ from django.db.models import Count
 
 from .serializers import UrlShortenerSerializer
 from .models import UrlShortener
-from .service import create_shortner_url
 
 
 class MakeshortUrl(generics.CreateAPIView):
     serializer_class = UrlShortenerSerializer
 
     def post(self, request):
-        data = request.data
         hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
-        shorturl = (''.join(random.sample(hash, 8)))
+        longurl = request.data.get('longurl')
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[-1].strip()
+        else:
+            ip = request.META.get('REMOTE_ADDR')
 
-        if UrlShortener.objects.filter(shorturl=shorturl).exists():
-            longurl, shorturl = create_shortner_url(data['longurl'], shorturl)
-            return Response({'longurl': longurl, 'shorturl': shorturl})
+        long_url_obj = UrlShortener.objects.filter(longurl=longurl, user_ip_address=ip)
+        if long_url_obj.exists():
+            long_url_obj = long_url_obj.get()
+            return Response({'longurl': long_url_obj.longurl, 'shorturl': settings.HOST_URL + long_url_obj.shorturl})
 
-        longurl, shorturl = create_shortner_url(data['longurl'], shorturl)
+        shorturl = ''.join(random.sample(hash, 8))
+        while UrlShortener.objects.filter(shorturl=shorturl).exists():
+            shorturl = ''.join(random.sample(hash, 8))
+
+        url_pair = UrlShortener()
+        url_pair.longurl = longurl
+        url_pair.shorturl = shorturl
+        url_pair.user_ip_address = ip
+        url_pair.save()
+        shorturl = settings.HOST_URL + shorturl
 
         return Response({'longurl': longurl, 'shorturl': shorturl})
 
