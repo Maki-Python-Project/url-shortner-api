@@ -1,11 +1,11 @@
-FROM python:3.8.10
+FROM python:3.10.7
 
 WORKDIR /usr/src/app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get -y update && apt-get -y install postgresql postgresql-client gcc python3-dev musl-dev
+RUN apt-get -y update && apt-get -y install postgresql postgresql-client gcc python3-dev musl-dev netcat lsof procps
 
 RUN pip install --upgrade pip
 COPY ./requirements.txt .
