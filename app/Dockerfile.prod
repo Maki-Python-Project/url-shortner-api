@@ -1,11 +1,11 @@
-FROM python:3.8.10 as builder
+FROM python:3.10.7 as builder
 
 WORKDIR /usr/src/app
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get -y update && apt-get -y install postgresql postgresql-client gcc python3-dev musl-dev
+RUN apt-get -y update && apt-get -y install postgresql postgresql-client gcc python3-dev musl-dev netcat
 
 RUN pip install --upgrade pip
 RUN pip install flake8==5.0.4
@@ -15,7 +15,7 @@ RUN flake8 --ignore=E501,F401 .
 COPY ./requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r requirements.txt
 
-FROM python:3.8.10
+FROM python:3.10.7
 
 RUN mkdir -p /home/app
 
@@ -26,10 +26,13 @@ ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
 RUN mkdir $APP_HOME/mediafiles
+RUN mkdir -p /home/log/gunicorn/
+RUN touch /home/log/gunicorn/prod.log
+RUN chmod 777 /home/log/gunicorn/prod.log
 WORKDIR $APP_HOME
 
 RUN apt-get -y update && \
-    apt-get -y install libpq5
+    apt-get -y install libpq5 netcat lsof procps
 COPY --from=builder /usr/src/app/wheels /wheels
 COPY --from=builder /usr/src/app/requirements.txt .
 RUN pip install --no-cache /wheels/*
@@ -37,7 +40,7 @@ RUN pip install --no-cache /wheels/*
 
 COPY ./entrypoint.prod.sh .
 RUN sed -i 's/\r$//g'  $APP_HOME/entrypoint.prod.sh
-RUN chmod +x  $APP_HOME/entrypoint.prod.sh
+RUN chmod +x $APP_HOME/entrypoint.prod.sh
 
 COPY . $APP_HOME
 
