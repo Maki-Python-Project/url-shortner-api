@@ -1,3 +1,13 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import UrlShortener
+
+
+class ArticleAdmin(admin.ModelAdmin):
+    list_display = (
+        'longurl', 'shorturl'
+    )
+    save_on_top = True
+
+
+admin.site.register(UrlShortener, ArticleAdmin)
