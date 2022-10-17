@@ -106,4 +106,4 @@ REST_FRAMEWORK = {
     )
 }
 
-HOST_URL = os.environ.get("HOST_URL", "http://localhost/")
+HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")
