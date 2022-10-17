@@ -9,11 +9,14 @@ class AbstractRepository:
     def get(self, reference: dict) -> UrlShortener:
         raise NotImplementedError
 
-    def list_all(self) -> List(UrlShortener):
+    def list_all(self) -> List[UrlShortener]:
         raise NotImplementedError
 
-    def annotate(self, reference: dict) -> List(UrlShortener):
+    def annotate(self, reference: dict) -> List[UrlShortener]:
         raise NotImplementedError
 
-    def order_by(self, reference: dict) -> List(UrlShortener):
+    def order_by(self, reference: dict) -> List[UrlShortener]:
+        raise NotImplementedError
+
+    def count(self, reference: dict) -> List[UrlShortener]:
         raise NotImplementedError
