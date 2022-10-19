@@ -10,9 +10,16 @@ from rest_framework.response import Response
 from django.db.models import Count
 from django.http import HttpResponseRedirect
 from typing import Type
+from pymongo import MongoClient
 
 from .serializers import UrlShortenerSerializer
 from .models import UrlShortener
+from .repository import MongoRepository
+
+
+client = MongoClient('mongodb://mongoadmin:mongoadmin@localhost:27017/')
+db = client['url_test']
+obj = MongoRepository(db)
 
 
 class MakeshortUrl(generics.CreateAPIView):
@@ -49,7 +56,7 @@ class MakeshortUrl(generics.CreateAPIView):
 class RedirectUrl(View):
     def get(self, request: Response, shorturl: str) -> HttpResponseRedirect:
         redirect_link = UrlShortener.objects.filter(shorturl=shorturl).values('longurl').first()['longurl']
-        return redirect(redirect_link)
+        return redirect(redirect_link.longurl)
 
 
 class TheMostPopularUrl(generics.ListAPIView):
@@ -60,5 +67,5 @@ class TheMostPopularUrl(generics.ListAPIView):
 
 
 def get_count_all_shortened_url(request: Response) -> JsonResponse:
-    data = UrlShortener.objects.all().count()
+    data = obj.count()
     return JsonResponse({'count': data})
