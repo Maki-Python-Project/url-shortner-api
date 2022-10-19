@@ -60,9 +60,9 @@ DATABASES = {
         "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
         "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
         "CLIENT": {
-            'host': 'mongodb://mongodb:mongodb@db:27017/',
-            'username': 'mongodb',
-            'password': 'mongodb',
+            'host': os.environ.get("SQL_URI", "mongodb://mongoadmin:mongoadmin@db:27017"),
+            'username': os.environ.get("SQL_USER", "mongoadmin"),
+            'password': os.environ.get("SQL_PASSWORD", "mongoadmin"),
         },
         "PORT": os.environ.get("SQL_PORT", "5432"),
     }

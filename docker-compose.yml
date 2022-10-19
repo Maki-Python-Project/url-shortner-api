@@ -19,7 +19,7 @@ services:
             - ./.env.db
         environment:
             - AUTH=yes
-            - MONGO_INITDB_ROOT_USERNAME=mongod
-            - MONGO_INITDB_ROOT_PASSWORD=mongod
+            - MONGO_INITDB_ROOT_USERNAME=mongoadmin
+            - MONGO_INITDB_ROOT_PASSWORD=mongoadmin
         ports:
             - 27017:27017
