@@ -5,3 +5,5 @@ venv/
 __pycache__
 .env.prod
 .env.prod.db
+mongo_data
+mongodb
