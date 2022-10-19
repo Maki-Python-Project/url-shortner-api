@@ -4,11 +4,11 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-f_k#o3dm^(ni7+#sorz_7iw4suvekq-7*5x196ft2(xl^!o_2_'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split(" ")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -57,8 +57,8 @@ WSGI_APPLICATION = "base.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "djongo",
-        "NAME": 'url_test',
+        "ENGINE": os.environ.get("SQL_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.environ.get("SQL_DATABASE", BASE_DIR / "db.sqlite3"),
     }
 }
 
