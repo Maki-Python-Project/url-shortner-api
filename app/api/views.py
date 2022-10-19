@@ -3,69 +3,61 @@ import string
 from django.conf import settings
 
 from django.shortcuts import redirect
-from django.views import View
 from django.http import JsonResponse
-from rest_framework import generics
-from rest_framework.response import Response
-from django.db.models import Count
+from rest_framework.request import Request
+from rest_framework.decorators import api_view
 from django.http import HttpResponseRedirect
-from typing import Type
 from pymongo import MongoClient
 
-from .serializers import UrlShortenerSerializer
-from .models import UrlShortener
 from .repository import MongoRepository
+from .utils import convert_cursor_to_dict
 
 
 client = MongoClient('mongodb://mongoadmin:mongoadmin@localhost:27017/')
 db = client['url_test']
-obj = MongoRepository(db)
+db_connection = MongoRepository(db)
 
 
-class MakeshortUrl(generics.CreateAPIView):
-    serializer_class = UrlShortenerSerializer
+@api_view(['POST'])
+def create_short_url(request: Request) -> JsonResponse:
+    hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    longurl = request.data.get('longurl')
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[-1].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
 
-    def post(self, request: Response) -> Response:
-        hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
-        longurl = request.data.get('longurl')
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[-1].strip()
-        else:
-            ip = request.META.get('REMOTE_ADDR')
+    long_url_obj = db_connection.get_one({'longurl': longurl, 'user_ip_address': ip})
 
-        long_url_obj = UrlShortener.objects.filter(longurl=longurl, user_ip_address=ip)
-        if long_url_obj.exists():
-            long_url_obj = long_url_obj.get()
-            return Response({'longurl': long_url_obj.longurl, 'shorturl': settings.HOST_URL + long_url_obj.shorturl})
+    if long_url_obj is not None:
+        return JsonResponse(
+            {'longurl': long_url_obj['longurl'], 'shorturl': settings.HOST_URL + long_url_obj['shorturl']}
+        )
 
+    shorturl = ''.join(random.sample(hash, 8))
+    while db_connection.get_one({'shorturl': shorturl}) is not None:
         shorturl = ''.join(random.sample(hash, 8))
-        while UrlShortener.objects.filter(shorturl=shorturl).exists():
-            shorturl = ''.join(random.sample(hash, 8))
 
-        url_pair = UrlShortener()
-        url_pair.longurl = longurl
-        url_pair.shorturl = shorturl
-        url_pair.user_ip_address = ip
-        url_pair.save()
-        shorturl = settings.HOST_URL + shorturl
+    db_connection.add({'longurl': longurl, 'shorturl': shorturl, 'user_ip_address': ip})
+    shorturl = settings.HOST_URL + shorturl
 
-        return Response({'longurl': longurl, 'shorturl': shorturl})
+    return JsonResponse({'longurl': longurl, 'shorturl': shorturl})
 
 
-class RedirectUrl(View):
-    def get(self, request: Response, shorturl: str) -> HttpResponseRedirect:
-        redirect_link = UrlShortener.objects.filter(shorturl=shorturl).values('longurl').first()['longurl']
-        return redirect(redirect_link.longurl)
+@api_view(['GET'])
+def redirect_shorturl(request: Request, shorturl) -> HttpResponseRedirect:
+    redirect_link = db_connection.get_one({'shorturl': shorturl})
+    return redirect(redirect_link['longurl'])
 
 
-class TheMostPopularUrl(generics.ListAPIView):
-    serializer_class = UrlShortenerSerializer
+@api_view(['GET'])
+def get_the_most_popular(request: Request) -> JsonResponse:
+    data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
+    return JsonResponse(convert_cursor_to_dict(data))
 
-    def get_queryset(self) -> Type[UrlShortener]:
-        return UrlShortener.objects.values("longurl").annotate(count=Count('longurl')).order_by("-count")
 
-
-def get_count_all_shortened_url(request: Response) -> JsonResponse:
-    data = obj.count()
+@api_view(['GET'])
+def get_count_all_shortened_url(request: Request) -> JsonResponse:
+    data = db_connection.count()
     return JsonResponse({'count': data})
