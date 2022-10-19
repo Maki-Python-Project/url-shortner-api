@@ -13,8 +13,8 @@ from .repository import MongoRepository
 from .utils import convert_cursor_to_dict
 
 
-client = MongoClient('mongodb://mongoadmin:mongoadmin@localhost:27017/')
-db = client['url_test']
+client = MongoClient(settings.DATABASES['default']['CLIENT']['host'])
+db = client[settings.DATABASES['default']['NAME']]
 db_connection = MongoRepository(db)
 
 
