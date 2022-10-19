@@ -5,5 +5,8 @@ venv/
 __pycache__
 .env.prod
 .env.prod.db
+Pipfile
+Pipfile.lock
 mongo_data
 mongodb
+db.sqlite3
