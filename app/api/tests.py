@@ -1,4 +1,3 @@
-from tkinter.messagebox import NO
 import pytest
 
 from rest_framework import status
