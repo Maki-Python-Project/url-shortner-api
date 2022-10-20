@@ -32,6 +32,6 @@ def get_short_url(db_connection: AbstractRepository) -> str:
 
 
 def get_db_connection() -> AbstractRepository:
-    client = MongoClient(settings.DATABASES['default']['CLIENT']['host'])
-    db = client[settings.DATABASES['default']['NAME']]
+    client = MongoClient('mongodb://mongoadmin:mongoadmin@localhost:27017/')
+    db = client['url_test']
     return MongoRepository(db)
