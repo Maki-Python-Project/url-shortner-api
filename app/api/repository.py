@@ -15,6 +15,9 @@ class AbstractRepository:
 
     def count(self, reference: dict) -> List[UrlShortener]:
         raise NotImplementedError
+    
+    def delete(self, reference: dict) -> List[UrlShortener]:
+        raise NotImplementedError
 
 
 class MongoRepository(AbstractRepository):
@@ -32,3 +35,6 @@ class MongoRepository(AbstractRepository):
 
     def count(self):
         return self.session.Url.count()
+
+    def delete(self, dict_data):
+        return self.session.Url.delete_one(dict_data)
