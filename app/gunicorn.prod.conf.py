@@ -9,4 +9,4 @@ loglevel = 'info'
 max_requests = 1000
 workers = max_workers()
 bind = '0.0.0.0:8000'
-accesslog = errorlog = '/usr/src/app/dev.log'
+accesslog = errorlog = '/home/log/gunicorn/prod.log'
