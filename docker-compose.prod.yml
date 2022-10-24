@@ -3,7 +3,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.prod
-    command: gunicorn -c gunicorn.prod.conf.py base.wsgi:application
+    command: gunicorn -c gunicorn.prod.conf.py base.asgi:application -k uvicorn.workers.UvicornWorker
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
