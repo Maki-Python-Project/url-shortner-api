@@ -1,4 +1,5 @@
 from typing import List
+from sqlalchemy import func
 
 from api.models import UrlShortener
 
@@ -7,7 +8,10 @@ class AbstractRepository:
     def add(self, reference: dict) -> None:
         raise NotImplementedError
 
-    def get_one(self, reference: dict) -> UrlShortener:
+    def get(self, reference: dict) -> UrlShortener:
+        raise NotImplementedError
+    
+    def filter(self, reference: dict) -> UrlShortener:
         raise NotImplementedError
 
     def annotate(self, reference: dict) -> List[UrlShortener]:
@@ -16,25 +20,24 @@ class AbstractRepository:
     def count(self, reference: dict) -> List[UrlShortener]:
         raise NotImplementedError
 
-    def delete(self, reference: dict) -> List[UrlShortener]:
-        raise NotImplementedError
 
-
-class PostgresRepository(AbstractRepository):
+class SqlAlchemyRepository(AbstractRepository):
     def __init__(self, session) -> None:
         self.session = session
 
-    def add(self, reference: dict) -> None:
-        pass
+    def add(self, reference: str) -> None:
+        self.session.add(reference)
 
-    def get_one(self, reference: dict) -> UrlShortener:
-        pass
+    def get(self, reference: str) -> UrlShortener:
+        return self.session.query(UrlShortener).filter_by(reference=reference).one()
 
-    def annotate(self, reference: dict) -> List[UrlShortener]:
-        pass
+    def filter(self, reference: str) -> UrlShortener:
+        return self.session.query(UrlShortener).filter_by(reference=reference)
 
-    def count(self, reference: dict) -> List[UrlShortener]:
-        pass
+    def annotate(self, reference: str) -> List[UrlShortener]:
+        return self.session.query(
+            func.count(UrlShortener.reference), UrlShortener.reference
+        ).group_by(UrlShortener.reference)
 
-    def delete(self, reference: dict) -> List[UrlShortener]:
-        pass
+    def count(self, reference: str) -> List[UrlShortener]:
+        return self.session.query(UrlShortener).filter_by(reference=reference).count()
