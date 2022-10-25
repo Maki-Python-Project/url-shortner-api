@@ -1,10 +1,9 @@
-from django.db import models
+from pydantic import BaseModel
+from ipaddress import IPv4Address
 
 
-class UrlShortener(models.Model):
-    user_ip_address = models.GenericIPAddressField(default='0.0.0.0')
-    longurl = models.CharField(max_length=255)
-    shorturl = models.SlugField(max_length=8)
-
-    def __str__(self) -> str:
-        return self.shorturl
+class UrlShortener(BaseModel):
+    id: int
+    user_ip_address: IPv4Address
+    longurl: str
+    shorturl: str

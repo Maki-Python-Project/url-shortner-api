@@ -1,7 +1,4 @@
-import imp
-import random
-import string
-
+from api.apps import application
 from django.conf import settings
 from django.shortcuts import redirect
 from django.http import JsonResponse
@@ -10,8 +7,8 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 from typing import Type
 
-from .models import UrlShortener
-from .utils import get_user_ip, get_short_url
+from api.models import UrlShortener
+from api.utils import get_user_ip, get_short_url
 
 
 async def create_shorturl(request: Response) -> Response:
@@ -39,9 +36,9 @@ async def redirect_shorturl(request: Response, shorturl: str) -> HttpResponseRed
 
 def get_the_most_popular(request) -> Type[UrlShortener]:
     qs = UrlShortener.objects.values("longurl").annotate(count=Count('longurl')).order_by('-count')
-    return  JsonResponse(list(qs), safe=False)
+    return JsonResponse(list(qs), safe=False)
 
- 
+
 def get_count_all_shortened_url(request: Response) -> JsonResponse:
     data = UrlShortener.objects.all().count()
     return JsonResponse({'count': data})
