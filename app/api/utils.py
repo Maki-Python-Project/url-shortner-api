@@ -1,10 +1,29 @@
-def conver_fetch_to_dict(values):
-    list_of_values_from_fetch = []
-    most_popular_dict = {}
+import string
+import random
 
-    for idx in range(len(values)):
-        list_of_values_from_fetch.append({'longurl': values[idx][0], 'shorturl': values[idx][1]})
+from django.http import HttpRequest
 
-    most_popular_dict['most_popular'] = list_of_values_from_fetch
+from .models import UrlShortener
 
-    return most_popular_dict
+
+def get_user_ip(request: HttpRequest) -> str:
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        return x_forwarded_for.split(',')[-1].strip()
+    else:
+        return request.META.get('REMOTE_ADDR')
+
+
+async def get_short_url() -> str:
+    hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
+    shorturl = ''.join(random.sample(hash, 8))
+    while True:
+        has_to_continue = False
+        async for obj in UrlShortener.objects.filter(shorturl=shorturl):
+            shorturl = ''.join(random.sample(hash, 8))
+            has_to_continue = True
+
+        if not has_to_continue:
+            break
+
+    return shorturl
