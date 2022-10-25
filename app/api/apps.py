@@ -1,6 +1,4 @@
-from django.apps import AppConfig
+from fastapi import FastAPI
 
 
-class ApiConfig(AppConfig):
-    default_auto_field = "django.db.models.BigAutoField"
-    name = "api"
+application = FastAPI()
