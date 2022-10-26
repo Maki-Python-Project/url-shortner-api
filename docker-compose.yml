@@ -1,7 +1,7 @@
 services:
     web:
         build: ./app
-        command: gunicorn -c gunicorn.conf.py base.asgi:application -k uvicorn.workers.UvicornWorker
+        command: uvicorn api.apps:application --reload --port 8000
         volumes:
             - ./app/:/usr/src/app/
             - static_volume:/home/app/web/staticfiles
