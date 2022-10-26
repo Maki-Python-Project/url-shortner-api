@@ -30,7 +30,7 @@ async def get_short_url() -> str:
     return shorturl
 
 
-def get_db():
+def get_db_connection():
     db = SessionLocal()
     try:
         yield db

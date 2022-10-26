@@ -1,7 +1,7 @@
 services:
     web:
         build: ./app
-        command: uvicorn api.apps:application --reload --port 8000
+        command: bash -c "alembic upgrade head && uvicorn api.apps:application --reload --port 8000"
         volumes:
             - ./app/:/usr/src/app/
             - static_volume:/home/app/web/staticfiles

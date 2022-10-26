@@ -39,5 +39,5 @@ class SqlAlchemyRepository(AbstractRepository):
             func.count(UrlShortener.reference), UrlShortener.reference
         ).group_by(UrlShortener.reference)
 
-    def count(self, reference: str) -> List[UrlShortener]:
-        return self.session.query(UrlShortener).filter_by(reference=reference).count()
+    def count(self) -> List[UrlShortener]:
+        return self.session.query(UrlShortener).all().count()

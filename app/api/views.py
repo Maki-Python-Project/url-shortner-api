@@ -1,16 +1,14 @@
-import os
+import os, sys
 
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.apps import application
 from api.models import UrlShortener, Base
-from api.repository import PostgresRepository
-from api.utils import convert_cursor_to_dict, get_user_ip, get_short_url, get_db_connection
+from api.utils import get_user_ip, get_short_url, get_db_connection
 from api.database import engine
 
-session = None
-repo = PostgresRepository(session)
+
 HOST_URL = os.environ.get('HOST_URL')
 
 Base.metadata.create_all(bind=engine)
@@ -45,13 +43,14 @@ async def redirect_shorturl(shorturl: str) -> RedirectResponse:
 
 @application.get('/the-most-popular/')
 def get_the_most_popular() -> UrlShortener:
-    db_connection = get_db_connection()
-    data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
-    return JSONResponse(convert_cursor_to_dict(data))
+    # db_connection = get_db_connection()
+    # data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
+    # return JSONResponse(convert_cursor_to_dict(data))
+    pass
 
 
 @application.get('/shortened-urls-count/')
-def get_count_all_shortened_url() -> JSONResponse:
-    db_connection = get_db_connection()
+def get_count_all_shortened_url(db = Depends(get_db_connection)) -> JSONResponse:
+    db_connection = db
     data = db_connection.count()
     return JSONResponse({'count': data})
