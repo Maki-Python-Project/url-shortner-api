@@ -1,9 +1,11 @@
-from pydantic import BaseModel
-from ipaddress import IPv4Address
+from sqlalchemy import Column, Integer, String
+
+from .database import Base
 
 
-class UrlShortener(BaseModel):
-    id: int
-    user_ip_address: IPv4Address
-    longurl: str
-    shorturl: str
+class UrlShortener(Base):
+    __tablename__ = "urlshortener"
+    id = Column(Integer, primary_key=True, index=True)
+    user_ip_address = Column(String, index=True, default='127.0.0.0')
+    longurl = Column(String, index=True)
+    shorturl = Column(String(8), index=True)

@@ -3,7 +3,8 @@ import random
 
 from django.http import HttpRequest
 
-from .models import UrlShortener
+from api.models import UrlShortener
+from api.database import SessionLocal
 
 
 def get_user_ip(request: HttpRequest) -> str:
@@ -27,3 +28,11 @@ async def get_short_url() -> str:
             break
 
     return shorturl
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

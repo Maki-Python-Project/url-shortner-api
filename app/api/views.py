@@ -1,4 +1,3 @@
-from api.apps import application
 from django.conf import settings
 from django.shortcuts import redirect
 from django.http import JsonResponse
@@ -7,8 +6,13 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 from typing import Type
 
-from api.models import UrlShortener
+from api.apps import application
+from api.models import UrlShortener, Base
 from api.utils import get_user_ip, get_short_url
+from api.database import engine
+
+
+Base.metadata.create_all(bind=engine)
 
 
 async def create_shorturl(request: Response) -> Response:
