@@ -4,14 +4,16 @@ from fastapi import Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
 from api.apps import application
-from api.models import UrlShortener
+from api.models import UrlShortener, Base
 from api.repository import PostgresRepository
 from api.utils import convert_cursor_to_dict, get_user_ip, get_short_url, get_db_connection
-
+from api.database import engine
 
 session = None
 repo = PostgresRepository(session)
 HOST_URL = os.environ.get('HOST_URL')
+
+Base.metadata.create_all(bind=engine)
 
 
 @application.post('/shorten/')
