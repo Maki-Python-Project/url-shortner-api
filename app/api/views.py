@@ -49,7 +49,7 @@ def get_the_most_popular() -> UrlShortener:
 
 
 @application.get('/shortened-urls-count/')
-def get_count_all_shortened_url(db = Depends(get_db_connection)) -> JSONResponse:
+def get_count_all_shortened_url(db=Depends(get_db_connection)) -> JSONResponse:
     db_connection = db
     data = db_connection.count()
     return JSONResponse({'count': data})
