@@ -1,4 +1,4 @@
-import os, sys
+import os
 
 from fastapi import Request, Depends
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -43,10 +43,9 @@ async def redirect_shorturl(shorturl: str) -> RedirectResponse:
 
 @application.get('/the-most-popular/')
 def get_the_most_popular() -> UrlShortener:
-    # db_connection = get_db_connection()
-    # data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
-    # return JSONResponse(convert_cursor_to_dict(data))
-    pass
+    db_connection = get_db_connection()
+    data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
+    return JSONResponse(data)
 
 
 @application.get('/shortened-urls-count/')
