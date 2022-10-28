@@ -1,57 +1,78 @@
 import os
 
-from fastapi import Request
+from fastapi import FastAPI
+from fastapi import Request, Depends
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse, RedirectResponse
+from sqlalchemy.orm import Session
 
-from api.apps import application
-from api.models import UrlShortener, Base
-from api.repository import PostgresRepository
-from api.utils import convert_cursor_to_dict, get_user_ip, get_short_url, get_db_connection
+from api import schemas
+from api import models
+
+# from api.crud import create_url, get_url_by_longurl_and_ip
 from api.database import engine
-
-session = None
-repo = PostgresRepository(session)
-HOST_URL = os.environ.get('HOST_URL')
-
-Base.metadata.create_all(bind=engine)
+from api.repository import SqlAlchemyRepository
+from api.utils import get_user_ip, get_short_url, get_db_connection
 
 
-@application.post('/shorten/')
-async def create_shorturl(url: UrlShortener, request: Request) -> JSONResponse:
-    db_connection = get_db_connection()
+application = FastAPI()
+
+
+SHORTENED_URLS = f"{os.environ.get('HOST_URL')}shorten/"
+
+models.Base.metadata.create_all(bind=engine)
+
+
+@application.get('/')
+def hello_world():
+    return JSONResponse({'hello world': 1})
+
+
+@application.post('/shorten/', response_model=schemas.UrlShortener)
+def create_shorturl(url: schemas.UrlShortenerCreate, request: Request, db: Session = Depends(get_db_connection)):
+    db_repo = SqlAlchemyRepository(db)
     longurl = url.longurl
 
     ip = get_user_ip(request)
 
-    long_url_obj = db_connection.get_one({'longurl': longurl, 'user_ip_address': ip})
+    long_url_obj = db_repo.get({'longurl': longurl, 'user_ip_address': ip})
 
-    async for obj in long_url_obj:
-        return JSONResponse({'longurl': obj.longurl, 'shorturl': HOST_URL + obj.shorturl})
+    if long_url_obj:
+        long_url_obj.shorturl = SHORTENED_URLS + long_url_obj.shorturl
+        return long_url_obj
 
-    shorturl = await get_short_url(db_connection)
+    shorturl = get_short_url(db_repo)
 
-    db_connection.add({'longurl': longurl, 'shorturl': shorturl, 'user_ip_address': ip})
-    shorturl = HOST_URL + shorturl
-
-    return JSONResponse({'longurl': longurl, 'shorturl': shorturl})
+    shortened_url_obj = models.UrlShortener(longurl=longurl, shorturl=shorturl, user_ip_address=ip)
+    shortened_url_obj = db_repo.add(shortened_url_obj)
+    shortened_url_obj.shorturl = SHORTENED_URLS + shorturl
+    return shortened_url_obj
 
 
 @application.get('/shorten/{shorturl}')
-async def redirect_shorturl(shorturl: str) -> RedirectResponse:
-    db_connection = get_db_connection()
-    redirect_link = db_connection.get_one({'shorturl': shorturl})
+async def redirect_shorturl(shorturl: str, db=Depends(get_db_connection)) -> RedirectResponse:
+    db_connection = SqlAlchemyRepository(db)
+    redirect_link = db_connection.get({'shorturl': shorturl})
     return RedirectResponse(url=redirect_link.longurl, status_code=301)
 
 
 @application.get('/the-most-popular/')
-def get_the_most_popular() -> UrlShortener:
-    db_connection = get_db_connection()
-    data = db_connection.annotate({'$group': {'_id': '$longurl', 'count': {'$sum': 1}}}, {'$sort': {'count': -1}})
-    return JSONResponse(convert_cursor_to_dict(data))
+def get_the_most_popular(db=Depends(get_db_connection)) -> models.UrlShortener:
+    db_connection = SqlAlchemyRepository(db)
+    data = db_connection.annotate({})
+    print(type(data))
+    result = []
+    for pair in data:
+        print(type(pair))
+        count, url = pair
+        r = {"count": count, "url": url}
+        result.append(r)
+
+    return result
 
 
 @application.get('/shortened-urls-count/')
-def get_count_all_shortened_url() -> JSONResponse:
-    db_connection = get_db_connection()
-    data = db_connection.count()
-    return JSONResponse({'count': data})
+def get_count_all_shortened_url(db=Depends(get_db_connection)) -> JSONResponse:
+    db_connection = SqlAlchemyRepository(db)
+    count = db_connection.count()
+    return JSONResponse(content=jsonable_encoder({'count': count}))

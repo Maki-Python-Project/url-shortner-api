@@ -8,4 +8,4 @@ class UrlShortener(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_ip_address = Column(String, index=True, default='127.0.0.0')
     longurl = Column(String, index=True)
-    shorturl = Column(String(8), index=True)
+    shorturl = Column(String, index=True)
