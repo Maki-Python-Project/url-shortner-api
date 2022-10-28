@@ -1,31 +1,21 @@
 import string
 import random
 
-from django.http import HttpRequest
+from fastapi import Request
 
-from api.models import UrlShortener
+from api.repository import SqlAlchemyRepository
 from api.database import SessionLocal
 
 
-def get_user_ip(request: HttpRequest) -> str:
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        return x_forwarded_for.split(',')[-1].strip()
-    else:
-        return request.META.get('REMOTE_ADDR')
+def get_user_ip(request: Request) -> str:
+    return request.client.host
 
 
-async def get_short_url() -> str:
+def get_short_url(db_con: SqlAlchemyRepository) -> str:
     hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
     shorturl = ''.join(random.sample(hash, 8))
-    while True:
-        has_to_continue = False
-        async for obj in UrlShortener.objects.filter(shorturl=shorturl):
-            shorturl = ''.join(random.sample(hash, 8))
-            has_to_continue = True
-
-        if not has_to_continue:
-            break
+    while db_con.get({'shorturl': shorturl}):
+        shorturl = ''.join(random.sample(hash, 8))
 
     return shorturl
 
