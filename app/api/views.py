@@ -9,23 +9,14 @@ from sqlalchemy.orm import Session
 from api import schemas
 from api import models
 
-# from api.crud import create_url, get_url_by_longurl_and_ip
 from api.database import engine
 from api.repository import SqlAlchemyRepository
 from api.utils import get_user_ip, get_short_url, get_db_connection
 
 
 application = FastAPI()
-
-
 SHORTENED_URLS = f"{os.environ.get('HOST_URL')}shorten/"
-
 models.Base.metadata.create_all(bind=engine)
-
-
-@application.get('/')
-def hello_world():
-    return JSONResponse({'hello world': 1})
 
 
 @application.post('/shorten/', response_model=schemas.UrlShortener)
@@ -60,10 +51,8 @@ async def redirect_shorturl(shorturl: str, db=Depends(get_db_connection)) -> Red
 def get_the_most_popular(db=Depends(get_db_connection)) -> models.UrlShortener:
     db_connection = SqlAlchemyRepository(db)
     data = db_connection.annotate({})
-    print(type(data))
     result = []
     for pair in data:
-        print(type(pair))
         count, url = pair
         r = {"count": count, "url": url}
         result.append(r)

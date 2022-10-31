@@ -3,7 +3,7 @@ services:
     build:
       context: ./app
       dockerfile: Dockerfile.prod
-    command: gunicorn -c gunicorn.prod.conf.py base.asgi:application -k uvicorn.workers.UvicornWorker
+    command: bash -c "alembic upgrade head && uvicorn api.views:application --reload --port 8000 --host 0.0.0.0"
     volumes:
       - static_volume:/home/app/web/staticfiles
       - media_volume:/home/app/web/mediafiles
