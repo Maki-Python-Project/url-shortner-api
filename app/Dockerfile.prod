@@ -26,9 +26,6 @@ ENV APP_HOME=/home/app/web
 RUN mkdir $APP_HOME
 RUN mkdir $APP_HOME/staticfiles
 RUN mkdir $APP_HOME/mediafiles
-RUN mkdir -p /home/log/gunicorn/
-RUN touch /home/log/gunicorn/prod.log
-RUN chmod 777 /home/log/gunicorn/prod.log
 WORKDIR $APP_HOME
 
 RUN apt-get -y update && \
