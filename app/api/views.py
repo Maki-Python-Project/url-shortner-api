@@ -1,10 +1,10 @@
 import os
 
+from api import schemas
 from fastapi import FastAPI
 from fastapi import Request
 from fastapi.responses import RedirectResponse
-
-from api import schemas
+from operator import itemgetter
 
 from api.database import database, engine, metadata
 from api.repository import SqlAlchemyRepository
@@ -58,13 +58,8 @@ async def redirect_shorturl(shorturl: str) -> RedirectResponse:
 async def get_the_most_popular():
     db_connection = SqlAlchemyRepository()
     data = await db_connection.annotate({})
-    result = []
-    for pair in data:
-        count, url = pair
-        r = {"count": count, "url": url}
-        result.append(r)
-
-    return result
+    most_popular_list = sorted(data, key=itemgetter('count_1'))
+    return most_popular_list[::-1]
 
 
 @application.get('/shortened-urls-count/')

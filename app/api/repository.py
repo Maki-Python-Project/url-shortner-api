@@ -1,10 +1,11 @@
 import sqlalchemy
 
 from typing import List
+from sqlalchemy import func, select, all_
 
 from api.database import database
 from api.models import urlshortener
-from api.schemas import UrlShortener, UrlShortenerInsert
+from api.schemas import UrlShortenerInsert
 
 
 class AbstractRepository:
@@ -43,13 +44,9 @@ class SqlAlchemyRepository(AbstractRepository):
         return await database.fetch_one(query)
 
     async def annotate(self, reference: dict):
-        return (
-            urlshortener.select()
-            # query(func.count(sqlalchemy.Table.id), sqlalchemy.Table.longurl)
-            # .group_by(sqlalchemy.Table.longurl)
-            # .all()
-        )
+        query = select(urlshortener.c.longurl, func.count(urlshortener.c.id)).group_by(urlshortener.c.longurl)
+        return await database.fetch_all(query)
 
     async def count(self):
-        pass
-        # return self.session.query(func.count(sqlalchemy.Table.id)).scalar()
+        query = select(func.count(urlshortener.c.id))
+        return await database.execute(query)
