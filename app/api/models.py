@@ -1,11 +1,13 @@
-from sqlalchemy import Column, Integer, String
+import sqlalchemy
 
-from .database import Base
+from api.database import metadata
 
 
-class UrlShortener(Base):
-    __tablename__ = "urlshortener"
-    id = Column(Integer, primary_key=True, index=True)
-    user_ip_address = Column(String, index=True, default='127.0.0.0')
-    longurl = Column(String, index=True)
-    shorturl = Column(String, index=True)
+urlshortener = sqlalchemy.Table(
+    "urlshortener",
+    metadata,
+    sqlalchemy.Column('id', sqlalchemy.Integer, primary_key=True, index=True),
+    sqlalchemy.Column('user_ip_address', sqlalchemy.String, index=True, default='127.0.0.0'),
+    sqlalchemy.Column('longurl', sqlalchemy.String, index=True),
+    sqlalchemy.Column('shorturl', sqlalchemy.String, index=True),
+)

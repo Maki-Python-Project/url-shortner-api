@@ -4,25 +4,16 @@ import random
 from fastapi import Request
 
 from api.repository import SqlAlchemyRepository
-from api.database import SessionLocal
 
 
 def get_user_ip(request: Request) -> str:
     return request.client.host
 
 
-def get_short_url(db_con: SqlAlchemyRepository) -> str:
+async def get_short_url(db_con: SqlAlchemyRepository) -> str:
     hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
     shorturl = ''.join(random.sample(hash, 8))
-    while db_con.get({'shorturl': shorturl}):
+    while await db_con.get_by_shorturl(shorturl):
         shorturl = ''.join(random.sample(hash, 8))
 
     return shorturl
-
-
-def get_db_connection():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
