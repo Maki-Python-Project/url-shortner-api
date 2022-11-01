@@ -43,7 +43,7 @@ async def create_shorturl(url: schemas.UrlShortenerCreate, request: Request):
 
     shortened_url_obj = schemas.UrlShortenerInsert(longurl=longurl, shorturl=shorturl, user_ip_address=ip)
     shortened_url_obj = await db_repo.add(shortened_url_obj)
-    shortened_url_obj.shorturl = SHORTENED_URLS + shorturl
+    shortened_url_obj['shorturl'] = SHORTENED_URLS + shortened_url_obj['shorturl']
     return shortened_url_obj
 
 
