@@ -1,19 +1,29 @@
 import os
 
-from api import schemas
-from fastapi import FastAPI
-from fastapi import Request
+from fastapi import FastAPI, Request
 from fastapi.responses import RedirectResponse
 from operator import itemgetter
 
+from api import schemas
 from api.database import database, engine, metadata
 from api.repository import SqlAlchemyRepository
 from api.utils import get_user_ip, get_short_url
+from api.schemas_redis import Task
 
 
 application = FastAPI()
 SHORTENED_URLS = f"{os.environ.get('HOST_URL')}shorten/"
 metadata.create_all(engine)
+
+
+@application.get("/task")
+async def all():
+    return Task.all_pks()
+
+
+@application.post("/task")
+async def create(task: Task):
+    return task.save()
 
 
 @application.on_event('startup')
