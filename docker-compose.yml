@@ -33,6 +33,9 @@ services:
         image: redis
         volumes:
             - redis_data:/var/lib/redis/data/
+        command: ["redis-server",  "--requirepass", "password"]
+        ports:
+        - "6379:6379"
 
 volumes:
     postgres_data:
