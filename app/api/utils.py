@@ -9,6 +9,10 @@ def get_user_ip(request: Request) -> str:
     return request.client.host
 
 
+def create_dictionary_key(ip: str, longurl: str) -> str:
+    return ip+'|'+longurl
+
+
 async def get_short_url(db_con: SqlAlchemyRepository) -> str:
     hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
     shorturl = ''.join(random.sample(hash, 8))
