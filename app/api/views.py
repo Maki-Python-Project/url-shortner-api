@@ -1,15 +1,13 @@
 import os
-
-from fastapi import FastAPI, Request
-from fastapi.responses import RedirectResponse
 from operator import itemgetter
 
 from api import schemas
+from api.config import get_redis
 from api.database import database, engine, metadata
 from api.repository import SqlAlchemyRepository
-from api.utils import get_user_ip, get_short_url
-from api.schemas_redis import Task
-
+from api.utils import get_short_url, get_user_ip
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import RedirectResponse
 
 application = FastAPI()
 SHORTENED_URLS = f"{os.environ.get('HOST_URL')}shorten/"
@@ -17,13 +15,20 @@ metadata.create_all(engine)
 
 
 @application.get("/task")
-async def all():
-    return Task.all_pks()
+async def all(redis_db=Depends(get_redis)):
+    result_list = []
+    for key in redis_db.scan_iter():
+        value = redis_db.get(key)
+        result_list.append({key: value})
+    return result_list
 
 
 @application.post("/task")
-async def create(task: Task):
-    return task.save()
+async def create(longurl: str, request: Request, redis_db=Depends(get_redis)):
+    db_repo = SqlAlchemyRepository()
+    shorturl = await get_short_url(db_repo)
+    redis_db.set(longurl, shorturl)
+    return {'longurl': longurl, 'shorturl': shorturl}
 
 
 @application.on_event('startup')

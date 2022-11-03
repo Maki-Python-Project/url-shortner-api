@@ -1,9 +1,8 @@
-import string
 import random
-
-from fastapi import Request
+import string
 
 from api.repository import SqlAlchemyRepository
+from fastapi import Request
 
 
 def get_user_ip(request: Request) -> str:

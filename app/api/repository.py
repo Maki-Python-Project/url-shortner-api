@@ -1,11 +1,10 @@
-import sqlalchemy
-
 from typing import List
-from sqlalchemy import func, select, all_
 
+import sqlalchemy
 from api.database import database
 from api.models import urlshortener
 from api.schemas import UrlShortenerInsert
+from sqlalchemy import func, select
 
 
 class AbstractRepository:

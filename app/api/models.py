@@ -1,7 +1,5 @@
 import sqlalchemy
-
 from api.database import metadata
-
 
 urlshortener = sqlalchemy.Table(
     "urlshortener",

@@ -1,6 +1,7 @@
-from redis_om import get_redis_connection
+import redis
+
+redis_pool = redis.ConnectionPool(host='redis', port=6379, db=0, password='admin', decode_responses=True)
 
 
-redis_db = get_redis_connection(
-    host='redis', port='6379'
-)
+def get_redis():
+    return redis.Redis(connection_pool=redis_pool)

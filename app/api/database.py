@@ -1,9 +1,7 @@
 import os
 
 import databases
-
-from sqlalchemy import create_engine, MetaData
-
+from sqlalchemy import MetaData, create_engine
 
 SQLALCHEMY_DATABASE_URL = os.environ.get('SQL_URI')
 
