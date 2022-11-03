@@ -1,9 +1,9 @@
-import pytest
 import random
 import string
-
-from rest_framework.test import APIClient
 from collections.abc import Callable
+
+import pytest
+from rest_framework.test import APIClient
 
 
 @pytest.fixture

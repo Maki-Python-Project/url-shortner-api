@@ -1,15 +1,13 @@
 import os
-
-from api import schemas
-from fastapi import FastAPI
-from fastapi import Request
-from fastapi.responses import RedirectResponse
 from operator import itemgetter
 
+from api import schemas
+from api.config import get_redis
 from api.database import database, engine, metadata
 from api.repository import SqlAlchemyRepository
-from api.utils import get_user_ip, get_short_url
-
+from api.utils import get_short_url, get_user_ip, create_dictionary_key
+from fastapi import Depends, FastAPI, Request
+from fastapi.responses import RedirectResponse
 
 application = FastAPI()
 SHORTENED_URLS = f"{os.environ.get('HOST_URL')}shorten/"
@@ -27,7 +25,7 @@ async def shutdown():
 
 
 @application.post('/shorten/', response_model=schemas.UrlShortener)
-async def create_shorturl(url: schemas.UrlShortenerCreate, request: Request):
+async def create_shorturl(url: schemas.UrlShortenerCreate, request: Request, redis_db=Depends(get_redis)):
     db_repo = SqlAlchemyRepository()
     longurl = url.longurl
 
@@ -41,6 +39,8 @@ async def create_shorturl(url: schemas.UrlShortenerCreate, request: Request):
 
     shorturl = await get_short_url(db_repo)
 
+    redis_db.set(shorturl, create_dictionary_key(ip, longurl))
+
     shortened_url_obj = schemas.UrlShortenerInsert(longurl=longurl, shorturl=shorturl, user_ip_address=ip)
     shortened_url_obj = await db_repo.add(shortened_url_obj)
     shortened_url_obj['shorturl'] = SHORTENED_URLS + shortened_url_obj['shorturl']
@@ -48,10 +48,15 @@ async def create_shorturl(url: schemas.UrlShortenerCreate, request: Request):
 
 
 @application.get('/shorten/{shorturl}')
-async def redirect_shorturl(shorturl: str) -> RedirectResponse:
-    db_connection = SqlAlchemyRepository()
-    redirect_link = await db_connection.get_by_shorturl(shorturl)
-    return RedirectResponse(url=redirect_link.longurl, status_code=301)
+async def redirect_shorturl(shorturl: str, redis_db=Depends(get_redis)) -> RedirectResponse:
+    if shorturl in redis_db.scan()[1]:
+        redirect_link = redis_db.get(shorturl).split('|')[1]
+    else:
+        db_connection = SqlAlchemyRepository()
+        redirect_link = await db_connection.get_by_shorturl(shorturl)
+        redirect_link = redirect_link.longurl
+
+    return RedirectResponse(url=redirect_link, status_code=301)
 
 
 @application.get('/the-most-popular/')

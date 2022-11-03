@@ -1,13 +1,16 @@
-import string
 import random
-
-from fastapi import Request
+import string
 
 from api.repository import SqlAlchemyRepository
+from fastapi import Request
 
 
 def get_user_ip(request: Request) -> str:
     return request.client.host
+
+
+def create_dictionary_key(ip: str, longurl: str) -> str:
+    return ip+'|'+longurl
 
 
 async def get_short_url(db_con: SqlAlchemyRepository) -> str:
