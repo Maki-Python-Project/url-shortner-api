@@ -1,8 +1,4 @@
 from typing import Type
-
-from api.models import UrlShortener
-from api.serializers import UrlShortenerSerializer
-from api.utils import get_short_url, get_user_ip
 from django.conf import settings
 from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.db.models import Count
@@ -11,8 +7,13 @@ from django.shortcuts import redirect
 from django.views import View
 from django.views.decorators.cache import cache_page
 from django.utils.decorators import method_decorator
+from django.views.decorators.vary import vary_on_cookie
 from rest_framework import generics
 from rest_framework.response import Response
+
+from api.models import UrlShortener
+from api.serializers import UrlShortenerSerializer
+from api.utils import get_short_url, get_user_ip
 
 
 CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
@@ -57,8 +58,13 @@ class TheMostPopularUrl(generics.ListAPIView):
     def get_queryset(self) -> UrlShortener:
         return UrlShortener.objects.values("longurl").annotate(count=Count('longurl')).order_by("-count")
 
+    @method_decorator(vary_on_cookie)
+    @method_decorator(cache_page(CACHE_TTL))
+    def dispatch(self, *args, **kwargs):
+        return super(TheMostPopularUrl, self).dispatch(*args, **kwargs)
 
-# @cache_page(CACHE_TTL)
+
+@cache_page(CACHE_TTL)
 def get_count_all_shortened_url(request: Response) -> JsonResponse:
     data = UrlShortener.objects.all().count()
     return JsonResponse({'count': data})

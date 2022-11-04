@@ -71,13 +71,17 @@ CACHES = {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": "redis://redis:6379/0",
         "OPTIONS": {
+            "PASSWORD": "admin",
             "CLIENT_CLASS": "django_redis.client.DefaultClient"
         },
         "KEY_PREFIX": "example"
     }
 }
 
-CACHE_TTL = 60 * 60
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+CACHE_TTL = 60 * 1
 
 AUTH_PASSWORD_VALIDATORS = [
     {
