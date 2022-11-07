@@ -30,8 +30,18 @@ services:
       - 443:443
     depends_on:
       - web
+  redis:
+    image: redis:7.0
+    restart: always
+    ports:
+      - 6379:6379
+    command: bash -c "redis-server --bind 0.0.0.0 --port 6379 --requirepass admin"
+    volumes:
+      - redis_data:/data
 
 volumes:
   postgres_data:
   static_volume:
   media_volume:
+  redis_data:
+    driver: local
