@@ -11,30 +11,25 @@ from django.db.models import Count
 from django.http import HttpResponseRedirect
 from typing import Type
 
-from .serializers import UrlShortenerSerializer
-from .models import UrlShortener
+from api.serializers import UrlShortenerSerializer
+from api.models import UrlShortener
+from api.utils import get_user_ip, get_short_url
 
 
 class MakeshortUrl(generics.CreateAPIView):
     serializer_class = UrlShortenerSerializer
 
     def post(self, request: Response) -> Response:
-        hash = string.ascii_uppercase + string.ascii_lowercase + string.digits
         longurl = request.data.get('longurl')
-        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            ip = x_forwarded_for.split(',')[-1].strip()
-        else:
-            ip = request.META.get('REMOTE_ADDR')
+
+        ip = get_user_ip(request)
 
         long_url_obj = UrlShortener.objects.filter(longurl=longurl, user_ip_address=ip)
         if long_url_obj.exists():
             long_url_obj = long_url_obj.get()
             return Response({'longurl': long_url_obj.longurl, 'shorturl': settings.HOST_URL + long_url_obj.shorturl})
 
-        shorturl = ''.join(random.sample(hash, 8))
-        while UrlShortener.objects.filter(shorturl=shorturl).exists():
-            shorturl = ''.join(random.sample(hash, 8))
+        shorturl = get_short_url()
 
         url_pair = UrlShortener()
         url_pair.longurl = longurl
