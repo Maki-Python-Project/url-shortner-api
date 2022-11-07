@@ -21,14 +21,16 @@ services:
     celery:
         restart: always
         build:
-            context: .
+            context: ./app
         command: celery -A base worker -l info
         volumes:
             - celery_data:/var/lib/celery/data/
         env_file:
         - ./.env.dev
+        depends_on:
+            - db
+            - web
     rabbitmq3:
-        container_name: "rabbitmq"
         image: rabbitmq:3-management-alpine
         ports:
             - 5672:5672

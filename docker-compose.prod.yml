@@ -30,8 +30,26 @@ services:
       - 443:443
     depends_on:
       - web
-
+  celery:
+    restart: always
+    build:
+        context: .
+    command: celery -A base worker -l info
+    volumes:
+        - celery_data:/var/lib/celery/data/
+    env_file:
+      - ./.env.dev
+    depends_on:
+      - db
+      # - redis
+      # - web
+  rabbitmq3:
+    image: rabbitmq:3-management-alpine
+    ports:
+        - 5672:5672
+        - 15672:15672
 volumes:
   postgres_data:
-  static_volume:
+  celery_data:
   media_volume:
+  static_volume:
