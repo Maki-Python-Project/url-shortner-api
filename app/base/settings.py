@@ -66,6 +66,8 @@ DATABASES = {
     }
 }
 
+CELERY_BROKER_URL = 'amqp://guest:guest@rabbitmq3:5672/'
+
 AUTH_PASSWORD_VALIDATORS = [
     {
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",

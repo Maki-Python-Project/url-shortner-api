@@ -18,6 +18,22 @@ services:
             - POSTGRES_USER=postgres
             - POSTGRES_PASSWORD=postgres
             - POSTGRES_DB=url_shortener_dev
+    celery:
+        restart: always
+        build:
+            context: .
+        command: celery -A base worker -l info
+        volumes:
+            - celery_data:/var/lib/celery/data/
+        env_file:
+        - ./.env.dev
+    rabbitmq3:
+        container_name: "rabbitmq"
+        image: rabbitmq:3-management-alpine
+        ports:
+            - 5672:5672
+            - 15672:15672
 
 volumes:
     postgres_data:
+    celery_data:
