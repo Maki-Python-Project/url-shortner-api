@@ -1,9 +1,10 @@
+import os
 import random
 import string
 
-from django.http import HttpRequest
-
 from api.models import UrlShortener
+from django.core.mail import send_mail
+from django.http import HttpRequest
 
 
 def get_user_ip(request: HttpRequest) -> str:
@@ -20,3 +21,13 @@ def get_short_url():
     while UrlShortener.objects.filter(shorturl=shorturl).exists():
         shorturl = ''.join(random.sample(hash, 8))
     return shorturl
+
+
+def send(user_email: str, shorturl: str, longurl: str) -> None:
+    send_mail(
+        'You have created shorturl',
+        f'Short URL: {shorturl} - Long URL: {longurl}',
+        os.getenv('EMAIL_HOST_USER'),
+        [user_email],
+        fail_silently=False,
+    )
