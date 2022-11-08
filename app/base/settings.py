@@ -114,22 +114,17 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
 
-RABBIT_HOST = os.getenv('RABBIT_HOST')
-RABBIT_PORT = os.getenv('RABBIT_PORT')
-RABBIT_VIRTUAL_HOST = os.getenv('RABBIT_VIRTUAL_HOST')
-RABBITMQ_ROUTING_KEY = os.getenv('RABBITMQ_ROUTING_KEY')
-RABBIT_USERNAME = os.getenv('RABBIT_USERNAME')
-RABBIT_PASSWORD = os.getenv('RABBIT_PASSWORD')
-
-CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq3:5672/"
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND')
 
 ASGI_APPLICATION = 'base.routing.application'
 
 CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",
-        "CONFIG": {
-            "host": "amqp://guest:guest@127.0.0.1/asgi",
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('localhost', 6379)],
         },
+        'ROUTING': 'example_channels.routing.channel_routing',
     },
 }
