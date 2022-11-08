@@ -1,10 +1,11 @@
-import os
 import random
+import os
 import string
 
-from api.models import UrlShortener
 from django.core.mail import send_mail
 from django.http import HttpRequest
+
+from api.models import UrlShortener
 
 
 def get_user_ip(request: HttpRequest) -> str:
