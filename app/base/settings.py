@@ -122,3 +122,14 @@ RABBIT_USERNAME = os.getenv('RABBIT_USERNAME')
 RABBIT_PASSWORD = os.getenv('RABBIT_PASSWORD')
 
 CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq3:5672/"
+
+ASGI_APPLICATION = 'base.routing.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_rabbitmq.core.RabbitmqChannelLayer",
+        "CONFIG": {
+            "host": "amqp://guest:guest@127.0.0.1/asgi",
+        },
+    },
+}
