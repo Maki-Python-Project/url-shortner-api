@@ -108,10 +108,17 @@ REST_FRAMEWORK = {
 
 HOST_URL = os.environ.get("HOST_URL", "http://localhost:8000/")
 
-CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq3:5672/"
-
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = int(os.getenv('EMAIL_PORT'))
+
+RABBIT_HOST = os.getenv('RABBIT_HOST')
+RABBIT_PORT = os.getenv('RABBIT_PORT')
+RABBIT_VIRTUAL_HOST = os.getenv('RABBIT_VIRTUAL_HOST')
+RABBITMQ_ROUTING_KEY = os.getenv('RABBITMQ_ROUTING_KEY')
+RABBIT_USERNAME = os.getenv('RABBIT_USERNAME')
+RABBIT_PASSWORD = os.getenv('RABBIT_PASSWORD')
+
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq3:5672/"
