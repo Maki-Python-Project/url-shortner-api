@@ -4,7 +4,6 @@ from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
 from django.http import JsonResponse
-from django.utils.safestring import mark_safe
 from rest_framework import generics
 from rest_framework.response import Response
 from django.db.models import Count
@@ -14,6 +13,7 @@ from typing import Type
 from api.serializers import UrlShortenerSerializer
 from api.models import UrlShortener
 from api.utils import get_user_ip, get_short_url
+from api.tasks import send_a_message_to_email
 
 
 def index(request):
@@ -25,6 +25,7 @@ class MakeshortUrl(generics.CreateAPIView):
 
     def post(self, request: Response) -> Response:
         longurl = request.data.get('longurl')
+        email = request.data.get('email')
 
         ip = get_user_ip(request)
 
@@ -41,6 +42,7 @@ class MakeshortUrl(generics.CreateAPIView):
         url_pair.user_ip_address = ip
         url_pair.save()
         shorturl = settings.HOST_URL + shorturl
+        send_a_message_to_email.delay(email, shorturl, longurl)
         return Response({'longurl': longurl, 'shorturl': shorturl})
 
 
