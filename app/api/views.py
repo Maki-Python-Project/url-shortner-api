@@ -1,5 +1,3 @@
-import json
-
 from django.conf import settings
 from django.shortcuts import redirect, render
 from django.views import View
